@@ -163,7 +163,6 @@
     .hero-stat-value{font-size:2.3rem;}
     .stat-tile{padding:13px;}
     .stat-tile .value{font-size:1.35rem;}
-    .macro-legend{grid-template-columns:1fr;}
   }
 
   .panel{
@@ -243,24 +242,22 @@
     font-size:0.72rem; font-weight:800; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-dim);
     margin-bottom:14px;
   }
-  .macro-bar{
-    display:flex; width:100%; height:26px; border-radius:8px; overflow:hidden;
-    background:var(--surface-2); margin-bottom:14px; gap:2px;
-  }
-  .macro-bar .seg{height:100%; transition:width 0.25s ease;}
-  .macro-legend{list-style:none; margin:0 0 26px; padding:0; display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:12px;}
-  .macro-legend li{display:flex; align-items:flex-start; gap:9px; font-size:0.85rem;}
-  .swatch{width:11px; height:11px; border-radius:3px; margin-top:4px; flex-shrink:0;}
-  .macro-legend .name{font-weight:700; display:block;}
-  .macro-legend .figs{color:var(--text-muted); font-family:'IBM Plex Mono', monospace; font-size:0.8rem; font-variant-numeric:tabular-nums;}
+  .macro-rows{display:flex; flex-direction:column; gap:16px; margin-bottom:26px;}
+  .macro-row-head{display:flex; align-items:baseline; gap:8px; margin-bottom:7px; flex-wrap:wrap;}
+  .swatch{width:11px; height:11px; border-radius:3px; flex-shrink:0;}
+  .macro-row-name{font-weight:700; font-size:0.85rem;}
+  .macro-row-figs{color:var(--text-muted); font-family:'IBM Plex Mono', monospace; font-size:0.8rem; font-variant-numeric:tabular-nums; margin-left:auto;}
+  .macro-row-track{width:100%; height:16px; border-radius:8px; overflow:hidden; background:var(--surface-2);}
+  .macro-row-fill{height:100%; border-radius:8px; transition:width 0.25s ease;}
 
-  .hydration-tile{
+  .target-tiles{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px;}
+  .target-tile{
     display:flex; align-items:center; justify-content:space-between; gap:12px;
     background:var(--surface-2); border:1px solid var(--border); border-radius:var(--radius-md);
     padding:14px 18px;
   }
-  .hydration-tile .label{font-size:0.8rem; font-weight:700; color:var(--text-muted);}
-  .hydration-tile .value{font-family:'IBM Plex Mono', monospace; font-weight:700; font-size:1.2rem; color:var(--sky);}
+  .target-tile .label{font-size:0.8rem; font-weight:700; color:var(--text-muted);}
+  .target-tile .value{font-family:'IBM Plex Mono', monospace; font-weight:700; font-size:1.2rem; color:var(--sky);}
 
   footer{padding:34px 0 50px; border-top:1px solid var(--border); margin-top:36px;}
   .footer-row{display:flex; flex-wrap:wrap; justify-content:space-between; gap:14px; align-items:center;}
@@ -273,7 +270,7 @@
   .yt-link:hover{background:var(--accent); color:var(--accent-ink);}
 
   @media (prefers-reduced-motion: reduce){
-    .macro-bar .seg{transition:none;}
+    .macro-row-fill{transition:none;}
   }
 </style>
 </head>
@@ -401,24 +398,49 @@
 
         <div class="macro-section">
           <h3>Macro split</h3>
-          <div class="macro-bar" role="img" id="macroBar" aria-label="Macro split bar chart">
-            <div class="seg" id="segProtein" style="background:var(--macro-protein);"></div>
-            <div class="seg" id="segCarbs" style="background:var(--macro-carbs);"></div>
-            <div class="seg" id="segFat" style="background:var(--macro-fat);"></div>
+          <div class="macro-rows">
+            <div class="macro-row">
+              <div class="macro-row-head">
+                <span class="swatch" style="background:var(--macro-protein);"></span>
+                <span class="macro-row-name">Protein</span>
+                <span class="macro-row-figs" id="proteinFigs">—</span>
+              </div>
+              <div class="macro-row-track">
+                <div class="macro-row-fill" id="segProtein" style="background:var(--macro-protein);"></div>
+              </div>
+            </div>
+            <div class="macro-row">
+              <div class="macro-row-head">
+                <span class="swatch" style="background:var(--macro-carbs);"></span>
+                <span class="macro-row-name">Carbs</span>
+                <span class="macro-row-figs" id="carbFigs">—</span>
+              </div>
+              <div class="macro-row-track">
+                <div class="macro-row-fill" id="segCarbs" style="background:var(--macro-carbs);"></div>
+              </div>
+            </div>
+            <div class="macro-row">
+              <div class="macro-row-head">
+                <span class="swatch" style="background:var(--macro-fat);"></span>
+                <span class="macro-row-name">Fat</span>
+                <span class="macro-row-figs" id="fatFigs">—</span>
+              </div>
+              <div class="macro-row-track">
+                <div class="macro-row-fill" id="segFat" style="background:var(--macro-fat);"></div>
+              </div>
+            </div>
           </div>
-          <ul class="macro-legend">
-            <li><span class="swatch" style="background:var(--macro-protein);"></span>
-              <span><span class="name">Protein</span><span class="figs" id="proteinFigs">—</span></span></li>
-            <li><span class="swatch" style="background:var(--macro-carbs);"></span>
-              <span><span class="name">Carbs</span><span class="figs" id="carbFigs">—</span></span></li>
-            <li><span class="swatch" style="background:var(--macro-fat);"></span>
-              <span><span class="name">Fat</span><span class="figs" id="fatFigs">—</span></span></li>
-          </ul>
         </div>
 
-        <div class="hydration-tile">
-          <span class="label">Hydration target</span>
-          <span class="value" id="hydrationValue">— L / day</span>
+        <div class="target-tiles">
+          <div class="target-tile">
+            <span class="label">Hydration target</span>
+            <span class="value" id="hydrationValue">— L / day</span>
+          </div>
+          <div class="target-tile">
+            <span class="label">Fiber target</span>
+            <span class="value" id="fiberValue">— g / day</span>
+          </div>
         </div>
       </section>
 
@@ -471,7 +493,8 @@
     proteinFigs: document.getElementById('proteinFigs'),
     carbFigs: document.getElementById('carbFigs'),
     fatFigs: document.getElementById('fatFigs'),
-    hydrationValue: document.getElementById('hydrationValue')
+    hydrationValue: document.getElementById('hydrationValue'),
+    fiberValue: document.getElementById('fiberValue')
   };
 
   function clamp(v, min, max){ return Math.max(min, Math.min(max, v)); }
@@ -634,6 +657,7 @@
     var macroTotal = proteinCals + carbCals + fatCals;
 
     var hydrationL = weightKg * 0.035 + (activity >= 1.55 ? 0.4 : 0);
+    var fiberG = goalCals / 1000 * 14;
 
     // ---- render ----
     els.calorieValue.textContent = round(goalCals).toLocaleString();
@@ -660,6 +684,7 @@
     els.fatFigs.textContent = round(fatG) + ' g · ' + round(fatCals) + ' kcal (' + round(fPct) + '%)';
 
     els.hydrationValue.textContent = hydrationL.toFixed(1) + ' L / day';
+    els.fiberValue.textContent = round(fiberG) + ' g / day';
   }
 
   compute();
