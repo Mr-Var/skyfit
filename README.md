@@ -1,8 +1,8 @@
-# Sky X Fit — Fitness Calculator
+# skyXfit — Fitness Calculator
 
-A single-file website: enter age, height, weight, sex, activity level and goal (lose fat / maintain / gain muscle), and it shows BMI, estimated body-fat %, BMR, maintenance calories, a daily calorie target, and a protein/carb/fat macro split. Everything runs in the browser — no backend, no build step, no dependencies to install.
+A single-file website: enter age, height, weight, sex, activity level and goal (Fat Loss / Weight Loss / Cutting / Bulking), and it shows BMI, estimated body-fat %, BMR, maintenance calories, a daily calorie target, and a protein/carb/fat macro split. Everything runs in the browser — no backend, no build step, no dependencies to install.
 
-Before sharing it, open `index.html` and replace the `#` in the "Subscribe on YouTube" link near the bottom with your real channel URL.
+The "Subscribe on YouTube" link near the bottom already points at `https://www.youtube.com/@AkashAinavilli` — update it in `index.html` if the channel URL ever changes.
 
 ## Deploy it (pick one)
 
