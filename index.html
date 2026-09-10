@@ -356,9 +356,10 @@
         <div class="field" style="margin-bottom:0;">
           <label>Goal</label>
           <div class="segmented" role="group" aria-label="Goal">
-            <button type="button" data-goal-btn="lose" class="active">Lose Fat</button>
-            <button type="button" data-goal-btn="maintain">Maintain</button>
-            <button type="button" data-goal-btn="gain">Gain Muscle</button>
+            <button type="button" data-goal-btn="fatloss" class="active">Fat Loss</button>
+            <button type="button" data-goal-btn="weightloss">Weight Loss</button>
+            <button type="button" data-goal-btn="cutting">Cutting</button>
+            <button type="button" data-goal-btn="bulking">Bulking</button>
           </div>
         </div>
       </section>
@@ -429,7 +430,7 @@
       <p class="disclaimer">Estimates only, not medical advice. BMI, body-fat and calorie needs vary by individual — check with a doctor or registered dietitian before making major changes to diet or training.</p>
       <div class="footer-row">
         <div class="footer-brand">SKY<span style="color:var(--accent);">X</span>FIT</div>
-        <a class="yt-link" href="#" id="ytLink">Subscribe on YouTube →</a>
+        <a class="yt-link" href="https://www.youtube.com/@AkashAinavilli" id="ytLink" target="_blank" rel="noopener">Subscribe on YouTube →</a>
       </div>
     </footer>
   </div>
@@ -441,7 +442,7 @@
   var state = {
     units: 'metric',
     sex: 'male',
-    goal: 'lose',
+    goal: 'fatloss',
     heightCm: 178,
     weightKg: 82,
     dirty: false
@@ -595,22 +596,35 @@
 
     var tdee = bmr * activity;
 
-    var goalCals, goalNote;
-    if (state.goal === 'lose'){
-      var floorCals = state.sex === 'male' ? 1500 : 1200;
-      goalCals = Math.max(tdee - 500, floorCals);
-      goalNote = (tdee - 500) < floorCals
-        ? 'Capped at a safe daily minimum — your maintenance is already low'
-        : '500 kcal below your ' + round(tdee) + ' kcal maintenance for steady fat loss (~0.5 kg/week)';
-    } else if (state.goal === 'gain'){
-      goalCals = tdee + 400;
-      goalNote = '400 kcal above your ' + round(tdee) + ' kcal maintenance for lean muscle gain';
+    var floorCals = state.sex === 'male' ? 1500 : 1200;
+    var goalCals, goalNote, rawTarget;
+    if (state.goal === 'fatloss'){
+      rawTarget = tdee - 500;
+      goalCals = Math.max(rawTarget, floorCals);
+      goalNote = 'steady, muscle-preserving pace (~0.5 kg/week)';
+    } else if (state.goal === 'weightloss'){
+      rawTarget = tdee - 750;
+      goalCals = Math.max(rawTarget, floorCals);
+      goalNote = 'faster pace for general weight loss (~0.75–1 kg/week)';
+    } else if (state.goal === 'cutting'){
+      rawTarget = tdee * 0.8;
+      goalCals = Math.max(rawTarget, floorCals);
+      goalNote = 'aggressive cut, high protein to hold onto muscle';
     } else {
-      goalCals = tdee;
-      goalNote = 'Matches your ' + round(tdee) + ' kcal maintenance — holds current weight';
+      rawTarget = tdee * 1.15;
+      goalCals = rawTarget;
+      goalNote = 'lean surplus for steady muscle gain';
     }
+    var isDeficitGoal = state.goal !== 'bulking';
+    var directionWord = state.goal === 'bulking' ? 'above' : 'below';
+    goalNote = (isDeficitGoal && rawTarget < floorCals)
+      ? 'Capped at a safe daily minimum — your maintenance is already low'
+      : Math.abs(round(tdee - goalCals)) + ' kcal ' + directionWord + ' your ' + round(tdee) + ' kcal maintenance — ' + goalNote;
 
-    var proteinPerKg = state.goal === 'lose' ? 2.2 : (state.goal === 'gain' ? 2.0 : 1.8);
+    var proteinPerKg = state.goal === 'fatloss' ? 2.2
+      : state.goal === 'weightloss' ? 1.8
+      : state.goal === 'cutting' ? 2.4
+      : 2.0;
     var proteinG = proteinPerKg * weightKg;
     var proteinCals = proteinG * 4;
     var fatCals = goalCals * 0.25;
