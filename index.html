@@ -1,0 +1,656 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Sky X Fit</title>
+<meta name="description" content="Free BMI, body-fat, calorie and macro calculator for the Sky X Fit fitness YouTube community." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* ---------- Tokens (dark-first) ---------- */
+  :root{
+    --bg:#0E1425;
+    --dawn-top:#0E1425;
+    --dawn-bottom:#2A1B1A;
+    --surface:#171F38;
+    --surface-2:#1F2A4A;
+    --border:#2A3557;
+    --text:#F2F3F7;
+    --text-muted:#9AA3C0;
+    --text-dim:#6D7699;
+    --accent:#FF7A32;
+    --accent-strong:#FF8F4D;
+    --accent-ink:#1A0F08;
+    --sky:#6DB4FF;
+    --good:#3FCB93;
+    --warn:#F0BB5C;
+    --bad:#F2695F;
+    --macro-protein:#2E86FF;
+    --macro-carbs:#C08A1E;
+    --macro-fat:#E2536F;
+    --shadow: 0 20px 50px -25px rgba(0,0,0,0.6);
+    --radius-lg:20px;
+    --radius-md:14px;
+    --radius-sm:9px;
+    --focus-ring: 0 0 0 3px color-mix(in srgb, var(--accent) 45%, transparent);
+    color-scheme: dark;
+  }
+  @media (prefers-color-scheme: light){
+    :root:not([data-theme="dark"]){
+      --bg:#F4F6FB;
+      --dawn-top:#EAF1FC;
+      --dawn-bottom:#FCEEE0;
+      --surface:#FFFFFF;
+      --surface-2:#ECF0F9;
+      --border:#DCE1EE;
+      --text:#101526;
+      --text-muted:#545E7E;
+      --text-dim:#8089A8;
+      --accent:#E85D1F;
+      --accent-strong:#C94A16;
+      --accent-ink:#FFFFFF;
+      --sky:#1D6FD1;
+      --good:#1F8F5F;
+      --warn:#B8791A;
+      --bad:#C93636;
+      --macro-protein:#1D6FD1;
+      --macro-carbs:#B8860B;
+      --macro-fat:#D1476A;
+      --shadow: 0 20px 45px -30px rgba(20,30,60,0.25);
+      color-scheme: light;
+    }
+  }
+  :root[data-theme="light"]{
+    --bg:#F4F6FB;
+    --dawn-top:#EAF1FC;
+    --dawn-bottom:#FCEEE0;
+    --surface:#FFFFFF;
+    --surface-2:#ECF0F9;
+    --border:#DCE1EE;
+    --text:#101526;
+    --text-muted:#545E7E;
+    --text-dim:#8089A8;
+    --accent:#E85D1F;
+    --accent-strong:#C94A16;
+    --accent-ink:#FFFFFF;
+    --sky:#1D6FD1;
+    --good:#1F8F5F;
+    --warn:#B8791A;
+    --bad:#C93636;
+    --macro-protein:#1D6FD1;
+    --macro-carbs:#B8860B;
+    --macro-fat:#D1476A;
+    --shadow: 0 20px 45px -30px rgba(20,30,60,0.25);
+    color-scheme: light;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Manrope', ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    font-size:15px;
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3{text-wrap:balance; margin:0;}
+  p{margin:0;}
+  a{color:var(--sky);}
+  ::selection{background:var(--accent); color:var(--accent-ink);}
+
+  .wrap{max-width:1180px; margin:0 auto; padding:0 clamp(16px,4vw,40px);}
+
+  /* ---------- Header / dawn band ---------- */
+  .site-header{
+    background:linear-gradient(180deg, var(--dawn-top) 0%, var(--dawn-bottom) 130%);
+    border-bottom:1px solid var(--border);
+    padding:22px 0 30px;
+  }
+  .brand-row{
+    display:flex; align-items:center; justify-content:space-between; gap:12px 16px; flex-wrap:wrap;
+    margin-bottom:18px;
+  }
+  .wordmark{
+    font-family:'Bebas Neue', 'Arial Narrow', sans-serif;
+    font-size:clamp(1.7rem, 2.6vw, 2.3rem);
+    letter-spacing:0.06em;
+    display:flex; align-items:center; gap:0.12em;
+  }
+  .wordmark .x{color:var(--accent);}
+  .theme-toggle{
+    display:inline-flex; align-items:center; gap:8px; min-height:40px;
+    background:var(--surface); border:1px solid var(--border); color:var(--text-muted);
+    border-radius:999px; padding:8px 14px; font-size:0.8rem; font-weight:600;
+    cursor:pointer; font-family:inherit;
+  }
+  .theme-toggle:hover{color:var(--text); border-color:var(--accent);}
+  .theme-toggle:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible{
+    outline:none; box-shadow:var(--focus-ring);
+  }
+  .eyebrow{
+    text-transform:uppercase; letter-spacing:0.14em; font-size:0.72rem; font-weight:700;
+    color:var(--accent); margin:0 0 10px;
+  }
+  .tagline{
+    font-family:'Bebas Neue', sans-serif;
+    font-size:clamp(1.4rem, 3vw, 2rem);
+    letter-spacing:0.02em;
+    margin-bottom:10px;
+    max-width:20ch;
+  }
+  .lede{color:var(--text-muted); max-width:62ch; font-size:0.95rem;}
+
+  /* ---------- App grid ---------- */
+  main{padding:32px 0 8px;}
+  .app-grid{
+    display:grid;
+    grid-template-columns: minmax(280px,380px) 1fr;
+    gap:22px;
+    align-items:start;
+  }
+  @media (max-width: 860px){
+    .app-grid{grid-template-columns:1fr;}
+  }
+  @media (max-width: 480px){
+    body{font-size:14px;}
+    .wrap{padding:0 14px;}
+    .panel{padding:18px;}
+    .app-grid{gap:16px;}
+    .segmented button{font-size:0.76rem; padding:8px 4px; flex-basis:72px;}
+    .hero-stat-value{font-size:2.3rem;}
+    .stat-tile{padding:13px;}
+    .stat-tile .value{font-size:1.35rem;}
+    .macro-legend{grid-template-columns:1fr;}
+  }
+
+  .panel{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:var(--radius-lg);
+    padding:24px;
+    box-shadow:var(--shadow);
+  }
+  .panel-eyebrow{
+    font-size:0.72rem; font-weight:800; letter-spacing:0.12em; text-transform:uppercase;
+    color:var(--text-dim); margin-bottom:18px;
+  }
+
+  /* ---------- Form ---------- */
+  .field{margin-bottom:18px;}
+  .field label{
+    display:block; font-size:0.8rem; font-weight:600; color:var(--text-muted); margin-bottom:7px;
+  }
+  .field .hint{font-weight:400; color:var(--text-dim); text-transform:none; letter-spacing:0;}
+  input[type="number"], select{
+    width:100%; min-height:44px; background:var(--surface-2); border:1px solid var(--border); color:var(--text);
+    border-radius:var(--radius-sm); padding:10px 12px; font-family:'IBM Plex Mono', ui-monospace, monospace;
+    font-size:0.95rem; font-variant-numeric:tabular-nums;
+  }
+  select{font-family:'Manrope', sans-serif; font-weight:600;}
+  .row-2{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+
+  .segmented{
+    display:flex; flex-wrap:wrap; background:var(--surface-2); border:1px solid var(--border); border-radius:var(--radius-sm);
+    padding:3px; gap:3px;
+  }
+  .segmented button{
+    flex:1 1 84px; min-height:40px; border:none; background:transparent; color:var(--text-muted); font-family:inherit;
+    font-weight:700; font-size:0.82rem; padding:9px 6px; border-radius:7px; cursor:pointer;
+  }
+  .segmented button.active{background:var(--accent); color:var(--accent-ink);}
+  .segmented button:hover:not(.active){color:var(--text);}
+
+  .imperial-group{display:none;}
+  [data-units="imperial"] .imperial-group{display:block;}
+  [data-units="imperial"] .metric-group{display:none;}
+
+  /* ---------- Results ---------- */
+  .results-panel{position:relative;}
+  .status-badge{
+    display:inline-block; font-size:0.68rem; font-weight:800; letter-spacing:0.1em; text-transform:uppercase;
+    padding:5px 10px; border-radius:999px; background:var(--surface-2); color:var(--text-dim);
+    border:1px solid var(--border); margin-bottom:14px;
+  }
+  .status-badge.is-live{color:var(--good); border-color:var(--good);}
+
+  .hero-stat{
+    border-bottom:1px solid var(--border); padding-bottom:22px; margin-bottom:22px;
+    display:flex; flex-wrap:wrap; align-items:baseline; gap:6px 14px;
+  }
+  .hero-stat-label{width:100%; font-size:0.8rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.08em;}
+  .hero-stat-value{
+    font-family:'IBM Plex Mono', monospace; font-weight:700; font-size:clamp(2.6rem,5vw,3.4rem);
+    color:var(--accent); font-variant-numeric:tabular-nums; line-height:1;
+  }
+  .hero-stat-unit{font-size:1rem; color:var(--text-muted); font-weight:600;}
+  .hero-stat-note{width:100%; margin-top:8px; color:var(--text-muted); font-size:0.88rem;}
+
+  .stat-grid{
+    display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:1px;
+    background:var(--border); border:1px solid var(--border); border-radius:var(--radius-md);
+    overflow:hidden; margin-bottom:26px;
+  }
+  .stat-tile{background:var(--surface); padding:16px;}
+  .stat-tile .label{font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; color:var(--text-dim); margin-bottom:8px;}
+  .stat-tile .value{font-family:'IBM Plex Mono', monospace; font-size:1.6rem; font-weight:700; font-variant-numeric:tabular-nums;}
+  .stat-tile .sub{font-size:0.78rem; color:var(--text-muted); margin-top:5px;}
+  .chip{display:inline-block; font-size:0.68rem; font-weight:800; padding:3px 8px; border-radius:6px; margin-top:6px;}
+
+  .macro-section h3{
+    font-size:0.72rem; font-weight:800; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-dim);
+    margin-bottom:14px;
+  }
+  .macro-bar{
+    display:flex; width:100%; height:26px; border-radius:8px; overflow:hidden;
+    background:var(--surface-2); margin-bottom:14px; gap:2px;
+  }
+  .macro-bar .seg{height:100%; transition:width 0.25s ease;}
+  .macro-legend{list-style:none; margin:0 0 26px; padding:0; display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:12px;}
+  .macro-legend li{display:flex; align-items:flex-start; gap:9px; font-size:0.85rem;}
+  .swatch{width:11px; height:11px; border-radius:3px; margin-top:4px; flex-shrink:0;}
+  .macro-legend .name{font-weight:700; display:block;}
+  .macro-legend .figs{color:var(--text-muted); font-family:'IBM Plex Mono', monospace; font-size:0.8rem; font-variant-numeric:tabular-nums;}
+
+  .hydration-tile{
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    background:var(--surface-2); border:1px solid var(--border); border-radius:var(--radius-md);
+    padding:14px 18px;
+  }
+  .hydration-tile .label{font-size:0.8rem; font-weight:700; color:var(--text-muted);}
+  .hydration-tile .value{font-family:'IBM Plex Mono', monospace; font-weight:700; font-size:1.2rem; color:var(--sky);}
+
+  footer{padding:34px 0 50px; border-top:1px solid var(--border); margin-top:36px;}
+  .footer-row{display:flex; flex-wrap:wrap; justify-content:space-between; gap:14px; align-items:center;}
+  .disclaimer{color:var(--text-dim); font-size:0.78rem; max-width:60ch; margin-bottom:16px;}
+  .footer-brand{font-family:'Bebas Neue', sans-serif; letter-spacing:0.05em; font-size:1.1rem; display:flex; align-items:center; gap:14px; flex-wrap:wrap;}
+  .yt-link{
+    font-family:'Manrope', sans-serif; font-weight:700; font-size:0.85rem; letter-spacing:0; color:var(--accent);
+    text-decoration:none; border:1px solid var(--accent); padding:7px 14px; border-radius:999px;
+  }
+  .yt-link:hover{background:var(--accent); color:var(--accent-ink);}
+
+  @media (prefers-reduced-motion: reduce){
+    .macro-bar .seg{transition:none;}
+  }
+</style>
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="wrap">
+      <div class="brand-row">
+        <div class="wordmark">SKY<span class="x">X</span>FIT</div>
+        <button class="theme-toggle" id="themeToggle" type="button" aria-label="Toggle light and dark theme">
+          <span id="themeToggleLabel">Dark</span>
+        </button>
+      </div>
+      <p class="eyebrow">Free tool for the community</p>
+      <h1 class="tagline">Train at sunrise. Know your numbers.</h1>
+      <p class="lede">Enter your stats and get your BMI, estimated body fat, daily calorie target and macro split — built for the Sky X Fit channel.</p>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <div class="app-grid" data-units="metric" id="appGrid">
+
+      <!-- FORM -->
+      <section class="panel form-panel" aria-labelledby="form-heading">
+        <h2 id="form-heading" class="panel-eyebrow">Your Stats</h2>
+
+        <div class="field">
+          <label>Units</label>
+          <div class="segmented" role="group" aria-label="Units">
+            <button type="button" class="active" data-units-btn="metric">Metric</button>
+            <button type="button" data-units-btn="imperial">Imperial</button>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Biological sex <span class="hint">— used only for the BMR formula</span></label>
+          <div class="segmented" role="group" aria-label="Biological sex">
+            <button type="button" class="active" data-sex-btn="male">Male</button>
+            <button type="button" data-sex-btn="female">Female</button>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="age">Age (years)</label>
+          <input type="number" id="age" min="14" max="90" value="27" />
+        </div>
+
+        <div class="field metric-group">
+          <label for="heightCm">Height (cm)</label>
+          <input type="number" id="heightCm" min="120" max="230" value="178" />
+        </div>
+        <div class="field imperial-group">
+          <label>Height</label>
+          <div class="row-2">
+            <input type="number" id="heightFt" min="3" max="7" value="5" aria-label="Height, feet" placeholder="ft" />
+            <input type="number" id="heightIn" min="0" max="11" value="10" aria-label="Height, inches" placeholder="in" />
+          </div>
+        </div>
+
+        <div class="field metric-group">
+          <label for="weightKg">Weight (kg)</label>
+          <input type="number" id="weightKg" min="30" max="250" value="82" />
+        </div>
+        <div class="field imperial-group">
+          <label for="weightLb">Weight (lb)</label>
+          <input type="number" id="weightLb" min="66" max="550" value="181" />
+        </div>
+
+        <div class="field">
+          <label for="activity">Activity level</label>
+          <select id="activity">
+            <option value="1.2">Sedentary — desk job, little exercise</option>
+            <option value="1.375">Light — exercise 1–3 days/week</option>
+            <option value="1.55" selected>Moderate — exercise 3–5 days/week</option>
+            <option value="1.725">Heavy — training 6–7 days/week</option>
+            <option value="1.9">Athlete — 2x/day training</option>
+          </select>
+        </div>
+
+        <div class="field" style="margin-bottom:0;">
+          <label>Goal</label>
+          <div class="segmented" role="group" aria-label="Goal">
+            <button type="button" data-goal-btn="lose" class="active">Lose Fat</button>
+            <button type="button" data-goal-btn="maintain">Maintain</button>
+            <button type="button" data-goal-btn="gain">Gain Muscle</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- RESULTS -->
+      <section class="panel results-panel" aria-labelledby="results-heading">
+        <span class="status-badge" id="statusBadge">Example figures — edit the form</span>
+        <h2 id="results-heading" class="panel-eyebrow">Your Numbers</h2>
+
+        <div class="hero-stat" aria-live="polite">
+          <span class="hero-stat-label">Daily calorie target</span>
+          <span class="hero-stat-value" id="calorieValue">—</span>
+          <span class="hero-stat-unit">kcal / day</span>
+          <p class="hero-stat-note" id="calorieNote"></p>
+        </div>
+
+        <div class="stat-grid">
+          <div class="stat-tile">
+            <div class="label">BMI</div>
+            <div class="value" id="bmiValue">—</div>
+            <span class="chip" id="bmiChip"></span>
+          </div>
+          <div class="stat-tile">
+            <div class="label">Body fat (est.)</div>
+            <div class="value" id="bfValue">—</div>
+            <div class="sub">Deurenberg formula estimate</div>
+          </div>
+          <div class="stat-tile">
+            <div class="label">BMR</div>
+            <div class="value" id="bmrValue">—</div>
+            <div class="sub">kcal at total rest</div>
+          </div>
+          <div class="stat-tile">
+            <div class="label">Maintenance</div>
+            <div class="value" id="tdeeValue">—</div>
+            <div class="sub">kcal to hold weight</div>
+          </div>
+        </div>
+
+        <div class="macro-section">
+          <h3>Macro split</h3>
+          <div class="macro-bar" role="img" id="macroBar" aria-label="Macro split bar chart">
+            <div class="seg" id="segProtein" style="background:var(--macro-protein);"></div>
+            <div class="seg" id="segCarbs" style="background:var(--macro-carbs);"></div>
+            <div class="seg" id="segFat" style="background:var(--macro-fat);"></div>
+          </div>
+          <ul class="macro-legend">
+            <li><span class="swatch" style="background:var(--macro-protein);"></span>
+              <span><span class="name">Protein</span><span class="figs" id="proteinFigs">—</span></span></li>
+            <li><span class="swatch" style="background:var(--macro-carbs);"></span>
+              <span><span class="name">Carbs</span><span class="figs" id="carbFigs">—</span></span></li>
+            <li><span class="swatch" style="background:var(--macro-fat);"></span>
+              <span><span class="name">Fat</span><span class="figs" id="fatFigs">—</span></span></li>
+          </ul>
+        </div>
+
+        <div class="hydration-tile">
+          <span class="label">Hydration target</span>
+          <span class="value" id="hydrationValue">— L / day</span>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <div class="wrap">
+    <footer>
+      <p class="disclaimer">Estimates only, not medical advice. BMI, body-fat and calorie needs vary by individual — check with a doctor or registered dietitian before making major changes to diet or training.</p>
+      <div class="footer-row">
+        <div class="footer-brand">SKY<span style="color:var(--accent);">X</span>FIT</div>
+        <a class="yt-link" href="#" id="ytLink">Subscribe on YouTube →</a>
+      </div>
+    </footer>
+  </div>
+
+<script>
+(function(){
+  "use strict";
+
+  var state = {
+    units: 'metric',
+    sex: 'male',
+    goal: 'lose',
+    heightCm: 178,
+    weightKg: 82,
+    dirty: false
+  };
+
+  var els = {
+    appGrid: document.getElementById('appGrid'),
+    age: document.getElementById('age'),
+    heightCm: document.getElementById('heightCm'),
+    heightFt: document.getElementById('heightFt'),
+    heightIn: document.getElementById('heightIn'),
+    weightKg: document.getElementById('weightKg'),
+    weightLb: document.getElementById('weightLb'),
+    activity: document.getElementById('activity'),
+    statusBadge: document.getElementById('statusBadge'),
+    calorieValue: document.getElementById('calorieValue'),
+    calorieNote: document.getElementById('calorieNote'),
+    bmiValue: document.getElementById('bmiValue'),
+    bmiChip: document.getElementById('bmiChip'),
+    bfValue: document.getElementById('bfValue'),
+    bmrValue: document.getElementById('bmrValue'),
+    tdeeValue: document.getElementById('tdeeValue'),
+    segProtein: document.getElementById('segProtein'),
+    segCarbs: document.getElementById('segCarbs'),
+    segFat: document.getElementById('segFat'),
+    proteinFigs: document.getElementById('proteinFigs'),
+    carbFigs: document.getElementById('carbFigs'),
+    fatFigs: document.getElementById('fatFigs'),
+    hydrationValue: document.getElementById('hydrationValue')
+  };
+
+  function clamp(v, min, max){ return Math.max(min, Math.min(max, v)); }
+  function round(v){ return Math.round(v); }
+
+  function markDirty(){
+    if (!state.dirty){
+      state.dirty = true;
+      els.statusBadge.textContent = 'Your results';
+      els.statusBadge.classList.add('is-live');
+    }
+  }
+
+  // ---- Units toggle ----
+  document.querySelectorAll('[data-units-btn]').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var next = btn.getAttribute('data-units-btn');
+      if (next === state.units) return;
+      document.querySelectorAll('[data-units-btn]').forEach(function(b){ b.classList.remove('active'); });
+      btn.classList.add('active');
+      state.units = next;
+      els.appGrid.setAttribute('data-units', next);
+      if (next === 'imperial'){
+        var totalIn = state.heightCm / 2.54;
+        els.heightFt.value = Math.floor(totalIn / 12);
+        els.heightIn.value = round(totalIn % 12);
+        els.weightLb.value = round(state.weightKg * 2.20462);
+      } else {
+        els.heightCm.value = round(state.heightCm);
+        els.weightKg.value = round(state.weightKg);
+      }
+      markDirty();
+      compute();
+    });
+  });
+
+  // ---- Sex toggle ----
+  document.querySelectorAll('[data-sex-btn]').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      document.querySelectorAll('[data-sex-btn]').forEach(function(b){ b.classList.remove('active'); });
+      btn.classList.add('active');
+      state.sex = btn.getAttribute('data-sex-btn');
+      markDirty();
+      compute();
+    });
+  });
+
+  // ---- Goal toggle ----
+  document.querySelectorAll('[data-goal-btn]').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      document.querySelectorAll('[data-goal-btn]').forEach(function(b){ b.classList.remove('active'); });
+      btn.classList.add('active');
+      state.goal = btn.getAttribute('data-goal-btn');
+      markDirty();
+      compute();
+    });
+  });
+
+  // ---- Numeric inputs ----
+  function onMetricHeight(){ state.heightCm = parseFloat(els.heightCm.value) || state.heightCm; markDirty(); compute(); }
+  function onMetricWeight(){ state.weightKg = parseFloat(els.weightKg.value) || state.weightKg; markDirty(); compute(); }
+  function onImperialHeight(){
+    var ft = parseFloat(els.heightFt.value) || 0;
+    var inch = parseFloat(els.heightIn.value) || 0;
+    state.heightCm = (ft * 12 + inch) * 2.54;
+    markDirty(); compute();
+  }
+  function onImperialWeight(){
+    state.weightKg = (parseFloat(els.weightLb.value) || 0) / 2.20462;
+    markDirty(); compute();
+  }
+
+  els.heightCm.addEventListener('input', onMetricHeight);
+  els.weightKg.addEventListener('input', onMetricWeight);
+  els.heightFt.addEventListener('input', onImperialHeight);
+  els.heightIn.addEventListener('input', onImperialHeight);
+  els.weightLb.addEventListener('input', onImperialWeight);
+  els.age.addEventListener('input', function(){ markDirty(); compute(); });
+  els.activity.addEventListener('change', function(){ markDirty(); compute(); });
+
+  // ---- Theme toggle ----
+  var themeToggle = document.getElementById('themeToggle');
+  var themeLabel = document.getElementById('themeToggleLabel');
+  function applyTheme(t){
+    if (t){ document.documentElement.setAttribute('data-theme', t); }
+    else { document.documentElement.removeAttribute('data-theme'); }
+    var isDark = t === 'dark' || (!t && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    themeLabel.textContent = isDark ? 'Dark' : 'Light';
+  }
+  var saved = null;
+  try { saved = localStorage.getItem('skyxfit-theme'); } catch(e){}
+  applyTheme(saved);
+  themeToggle.addEventListener('click', function(){
+    var current = document.documentElement.getAttribute('data-theme');
+    var isDarkNow = current === 'dark' || (!current && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    var next = isDarkNow ? 'light' : 'dark';
+    applyTheme(next);
+    try { localStorage.setItem('skyxfit-theme', next); } catch(e){}
+  });
+
+  // ---- Compute + render ----
+  function compute(){
+    var age = clamp(parseFloat(els.age.value) || 27, 10, 100);
+    var heightCm = clamp(state.heightCm, 100, 250);
+    var weightKg = clamp(state.weightKg, 25, 300);
+    var activity = parseFloat(els.activity.value) || 1.55;
+    var sexVal = state.sex === 'male' ? 1 : 0;
+
+    var heightM = heightCm / 100;
+    var bmi = weightKg / (heightM * heightM);
+    var bmiCategory, bmiChipVar;
+    if (bmi < 18.5){ bmiCategory = 'Underweight'; bmiChipVar = 'var(--sky)'; }
+    else if (bmi < 25){ bmiCategory = 'Normal'; bmiChipVar = 'var(--good)'; }
+    else if (bmi < 30){ bmiCategory = 'Overweight'; bmiChipVar = 'var(--warn)'; }
+    else { bmiCategory = 'Obese'; bmiChipVar = 'var(--bad)'; }
+
+    var bodyFat = clamp(1.2 * bmi + 0.23 * age - 10.8 * sexVal - 5.4, 3, 60);
+
+    var bmr = state.sex === 'male'
+      ? 10 * weightKg + 6.25 * heightCm - 5 * age + 5
+      : 10 * weightKg + 6.25 * heightCm - 5 * age - 161;
+
+    var tdee = bmr * activity;
+
+    var goalCals, goalNote;
+    if (state.goal === 'lose'){
+      var floorCals = state.sex === 'male' ? 1500 : 1200;
+      goalCals = Math.max(tdee - 500, floorCals);
+      goalNote = (tdee - 500) < floorCals
+        ? 'Capped at a safe daily minimum — your maintenance is already low'
+        : '500 kcal below your ' + round(tdee) + ' kcal maintenance for steady fat loss (~0.5 kg/week)';
+    } else if (state.goal === 'gain'){
+      goalCals = tdee + 400;
+      goalNote = '400 kcal above your ' + round(tdee) + ' kcal maintenance for lean muscle gain';
+    } else {
+      goalCals = tdee;
+      goalNote = 'Matches your ' + round(tdee) + ' kcal maintenance — holds current weight';
+    }
+
+    var proteinPerKg = state.goal === 'lose' ? 2.2 : (state.goal === 'gain' ? 2.0 : 1.8);
+    var proteinG = proteinPerKg * weightKg;
+    var proteinCals = proteinG * 4;
+    var fatCals = goalCals * 0.25;
+    var fatG = fatCals / 9;
+    var carbCals = Math.max(goalCals - proteinCals - fatCals, 0);
+    var carbG = carbCals / 4;
+    var macroTotal = proteinCals + carbCals + fatCals;
+
+    var hydrationL = weightKg * 0.035 + (activity >= 1.55 ? 0.4 : 0);
+
+    // ---- render ----
+    els.calorieValue.textContent = round(goalCals).toLocaleString();
+    els.calorieNote.textContent = goalNote;
+
+    els.bmiValue.textContent = bmi.toFixed(1);
+    els.bmiChip.textContent = bmiCategory;
+    els.bmiChip.style.background = bmiChipVar;
+    els.bmiChip.style.color = 'var(--bg)';
+
+    els.bfValue.textContent = bodyFat.toFixed(1) + '%';
+    els.bmrValue.textContent = round(bmr).toLocaleString();
+    els.tdeeValue.textContent = round(tdee).toLocaleString();
+
+    var pPct = macroTotal ? (proteinCals / macroTotal * 100) : 0;
+    var cPct = macroTotal ? (carbCals / macroTotal * 100) : 0;
+    var fPct = macroTotal ? (fatCals / macroTotal * 100) : 0;
+    els.segProtein.style.width = pPct + '%';
+    els.segCarbs.style.width = cPct + '%';
+    els.segFat.style.width = fPct + '%';
+
+    els.proteinFigs.textContent = round(proteinG) + ' g · ' + round(proteinCals) + ' kcal (' + round(pPct) + '%)';
+    els.carbFigs.textContent = round(carbG) + ' g · ' + round(carbCals) + ' kcal (' + round(cPct) + '%)';
+    els.fatFigs.textContent = round(fatG) + ' g · ' + round(fatCals) + ' kcal (' + round(fPct) + '%)';
+
+    els.hydrationValue.textContent = hydrationL.toFixed(1) + ' L / day';
+  }
+
+  compute();
+})();
+</script>
+
+</body>
+</html>
