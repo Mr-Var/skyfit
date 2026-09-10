@@ -30,6 +30,7 @@
     --macro-protein:#2E86FF;
     --macro-carbs:#C08A1E;
     --macro-fat:#E2536F;
+    --macro-fiber:#8A63D2;
     --shadow: 0 20px 50px -25px rgba(0,0,0,0.6);
     --radius-lg:20px;
     --radius-md:14px;
@@ -58,6 +59,7 @@
       --macro-protein:#1D6FD1;
       --macro-carbs:#B8860B;
       --macro-fat:#D1476A;
+      --macro-fiber:#7148B8;
       --shadow: 0 20px 45px -30px rgba(20,30,60,0.25);
       color-scheme: light;
     }
@@ -82,6 +84,7 @@
     --macro-protein:#1D6FD1;
     --macro-carbs:#B8860B;
     --macro-fat:#D1476A;
+    --macro-fiber:#7148B8;
     --shadow: 0 20px 45px -30px rgba(20,30,60,0.25);
     color-scheme: light;
   }
@@ -429,6 +432,16 @@
                 <div class="macro-row-fill" id="segFat" style="background:var(--macro-fat);"></div>
               </div>
             </div>
+            <div class="macro-row">
+              <div class="macro-row-head">
+                <span class="swatch" style="background:var(--macro-fiber);"></span>
+                <span class="macro-row-name">Fiber</span>
+                <span class="macro-row-figs" id="fiberFigs">—</span>
+              </div>
+              <div class="macro-row-track">
+                <div class="macro-row-fill" id="segFiber" style="background:var(--macro-fiber);"></div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -436,10 +449,6 @@
           <div class="target-tile">
             <span class="label">Hydration target</span>
             <span class="value" id="hydrationValue">— L / day</span>
-          </div>
-          <div class="target-tile">
-            <span class="label">Fiber target</span>
-            <span class="value" id="fiberValue">— g / day</span>
           </div>
         </div>
       </section>
@@ -493,8 +502,9 @@
     proteinFigs: document.getElementById('proteinFigs'),
     carbFigs: document.getElementById('carbFigs'),
     fatFigs: document.getElementById('fatFigs'),
-    hydrationValue: document.getElementById('hydrationValue'),
-    fiberValue: document.getElementById('fiberValue')
+    segFiber: document.getElementById('segFiber'),
+    fiberFigs: document.getElementById('fiberFigs'),
+    hydrationValue: document.getElementById('hydrationValue')
   };
 
   function clamp(v, min, max){ return Math.max(min, Math.min(max, v)); }
@@ -684,7 +694,10 @@
     els.fatFigs.textContent = round(fatG) + ' g · ' + round(fatCals) + ' kcal (' + round(fPct) + '%)';
 
     els.hydrationValue.textContent = hydrationL.toFixed(1) + ' L / day';
-    els.fiberValue.textContent = round(fiberG) + ' g / day';
+
+    var fiberScalePct = Math.min(100, fiberG / 40 * 100);
+    els.segFiber.style.width = fiberScalePct + '%';
+    els.fiberFigs.textContent = round(fiberG) + ' g / day';
   }
 
   compute();
